@@ -64,14 +64,14 @@ local gethui = gethui or function()
     end) or PlayerGui
 end
 
---[[ if getrenv and setreadonly then
+if getrenv and setreadonly then
     pcall(function()
         local env = getrenv()
         setreadonly(env, false)
         env.script = nil
         setreadonly(env, true)
     end)
-end ]]--
+end
 
 local gc_protect = function(tbl)
     pcall(function()
