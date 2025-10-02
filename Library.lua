@@ -301,6 +301,7 @@ local Templates = {
         FontFace = "Font",
         RichText = true,
         TextColor3 = "FontColor",
+        AutoLocalize = true,
     },
     TextButton = {
         AutoButtonColor = false,
@@ -308,6 +309,7 @@ local Templates = {
         FontFace = "Font",
         RichText = true,
         TextColor3 = "FontColor",
+        AutoLocalize = true,
     },
     TextBox = {
         BorderSizePixel = 0,
@@ -318,6 +320,7 @@ local Templates = {
         end,
         Text = "",
         TextColor3 = "FontColor",
+        AutoLocalize = true,
     },
     UIListLayout = {
         SortOrder = Enum.SortOrder.LayoutOrder,
@@ -1340,6 +1343,7 @@ local ScreenGui = New("ScreenGui", {
     ResetOnSpawn = false,
     IgnoreGuiInset = true,
     ZIndexBehavior = Enum.ZIndexBehavior.Global,
+    AutoLocalize = true,
 })
 ParentUI(ScreenGui)
 Library.ScreenGui = ScreenGui
