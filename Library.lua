@@ -23,7 +23,6 @@ local function randomString(length)
     end
     return result
 end
-local CoreGui: CoreGui = cloneref(game:GetService("CoreGui"))
 local Players: Players = cloneref(game:GetService("Players"))
 local RunService: RunService = cloneref(game:GetService("RunService"))
 local SoundService: SoundService = cloneref(game:GetService("SoundService"))
@@ -31,6 +30,8 @@ local UserInputService: UserInputService = cloneref(game:GetService("UserInputSe
 local TextService: TextService = cloneref(game:GetService("TextService"))
 local Teams: Teams = cloneref(game:GetService("Teams"))
 local TweenService: TweenService = cloneref(game:GetService("TweenService"))
+local Lighting: Lighting = cloneref(game:GetService("Lighting"))
+local PlayerGui = nil
 
 local getgenv = getgenv or function()
     return shared
@@ -58,9 +59,9 @@ end)()
 
 local gethui = gethui or function()
     return secureCall(function() 
-        local cg = game:GetService("CoreGui")
-        return cloneref and cloneref(cg) or cg
-    end) or CoreGui
+        local pg = LocalPlayer:WaitForChild("PlayerGui")
+        return cloneref and cloneref(pg) or pg
+    end) or PlayerGui
 end
 
 if getrenv and setreadonly then
@@ -83,6 +84,7 @@ local gc_protect = function(tbl)
 end
 
 local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
+PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Mouse = cloneref(LocalPlayer:GetMouse())
 
 local Labels = {}
@@ -94,8 +96,6 @@ gc_protect(Labels)
 gc_protect(Buttons)
 gc_protect(Toggles)
 gc_protect(Options)
-
-local Lighting: Lighting = cloneref(game:GetService("Lighting"))
 
 local BlurAnimationThread = nil
 local _ShowBlur = true
@@ -1311,7 +1311,7 @@ end
 local function SafeParentUI(Instance: Instance, Parent: Instance | () -> Instance)
     local success, _error = pcall(function()
         if not Parent then
-            Parent = CoreGui
+            Parent = PlayerGui
         end
 
         local DestinationParent
@@ -1331,7 +1331,7 @@ end
 
 local function ParentUI(UI: Instance, SkipHiddenUI: boolean?)
     if SkipHiddenUI then
-        SafeParentUI(UI, CoreGui)
+        SafeParentUI(UI, PlayerGui)
         return
     end
 
