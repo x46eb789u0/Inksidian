@@ -1,4 +1,4 @@
-local ThreadFix = setthreadidentity and true or false -- again
+local ThreadFix = setthreadidentity and true or false -- djjs
 if ThreadFix then
     local success = pcall(function() 
         setthreadidentity(8) 
@@ -292,7 +292,6 @@ local Templates = {
         FontFace = "Font",
         RichText = true,
         TextColor3 = "FontColor",
-        AutoLocalize = true,
     },
     TextButton = {
         AutoButtonColor = false,
@@ -300,7 +299,6 @@ local Templates = {
         FontFace = "Font",
         RichText = true,
         TextColor3 = "FontColor",
-        AutoLocalize = true,
     },
     TextBox = {
         BorderSizePixel = 0,
@@ -311,7 +309,6 @@ local Templates = {
         end,
         Text = "",
         TextColor3 = "FontColor",
-        AutoLocalize = true,
     },
     UIListLayout = {
         SortOrder = Enum.SortOrder.LayoutOrder,
@@ -1334,7 +1331,6 @@ local ScreenGui = New("ScreenGui", {
     ResetOnSpawn = false,
     IgnoreGuiInset = true,
     ZIndexBehavior = Enum.ZIndexBehavior.Global,
-    AutoLocalize = true,
 })
 ParentUI(ScreenGui)
 Library.ScreenGui = ScreenGui
@@ -1819,29 +1815,6 @@ function Library:AddContextMenu(
         })
     end
 
-    local function UpdateMenuPosition()
-        local OffsetValue = typeof(Offset) == "function" and Offset() or Offset
-        local XPos = math.floor(Holder.AbsolutePosition.X + OffsetValue[1])
-        local YPos = math.floor(Holder.AbsolutePosition.Y + OffsetValue[2])
-        
-        -- Check if dropdown would go off-screen at the bottom (only after menu is visible)
-        if Menu.Visible and Menu.AbsoluteSize.Y > 0 then
-            local ViewportSize = workspace.CurrentCamera.ViewportSize
-            local MenuHeight = Menu.AbsoluteSize.Y
-            
-            if YPos + MenuHeight > ViewportSize.Y - 10 then
-                -- Position above the holder instead
-                YPos = math.floor(Holder.AbsolutePosition.Y - MenuHeight - 1.5)
-                -- Ensure it doesn't go off-screen at the top either
-                if YPos < 10 then
-                    YPos = 10
-                end
-            end
-        end
-        
-        Menu.Position = UDim2.fromOffset(XPos, YPos)
-    end
-
     function Table:Open()
         if CurrentMenu == Table then
             return
@@ -1873,11 +1846,20 @@ function Library:AddContextMenu(
         end
 
         Menu.Visible = true
-        
-        -- Adjust position after menu is visible and sized
-        task.defer(UpdateMenuPosition)
 
-        Table.Signal = Holder:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdateMenuPosition)
+        Table.Signal = Holder:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+            if typeof(Offset) == "function" then
+                Menu.Position = UDim2.fromOffset(
+                    math.floor(Holder.AbsolutePosition.X + Offset()[1]),
+                    math.floor(Holder.AbsolutePosition.Y + Offset()[2])
+                )
+            else
+                Menu.Position = UDim2.fromOffset(
+                    math.floor(Holder.AbsolutePosition.X + Offset[1]),
+                    math.floor(Holder.AbsolutePosition.Y + Offset[2])
+                )
+            end
+        end)
     end
 
     function Table:Close()
