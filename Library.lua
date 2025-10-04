@@ -1,4 +1,4 @@
-local ThreadFix = setthreadidentity and true or false -- jdhdhd
+local ThreadFix = setthreadidentity and true or false
 if ThreadFix then
     local success = pcall(function() 
         setthreadidentity(8) 
@@ -440,7 +440,7 @@ end
 local function createBlurEffect()
     if not Library.BlurEffect then
         Library.BlurEffect = Instance.new("BlurEffect")
-        Library.BlurEffect.Name = "ObsidianBlur"
+        Library.BlurEffect.Name = "NewBlur"
         Library.BlurEffect.Size = 0
         Library.BlurEffect.Parent = Lighting
     end
@@ -1312,7 +1312,7 @@ local function ParentUI(UI: Instance, SkipHiddenUI: boolean?)
 end
 
 local ScreenGui = New("ScreenGui", {
-    Name = "Obsidian",
+    Name = "CrateGUI",
     DisplayOrder = 999,
     ResetOnSpawn = false,
 })
