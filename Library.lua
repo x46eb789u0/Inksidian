@@ -1339,12 +1339,20 @@ do
     NotificationArea = New("Frame", {
         AnchorPoint = Vector2.new(1, 0),
         BackgroundTransparency = 1,
-        Position = UDim2.new(1, -6, 0, 6),
-        Size = UDim2.new(0, 300, 1, -6),
+        Position = UDim2.new(1, 0, 0, 0),
+        Size = UDim2.new(0, 300, 1, 0),
         Parent = ScreenGui,
+    })
+    New("UIPadding", {
+        PaddingBottom = UDim.new(0, 6),
+        PaddingLeft = UDim.new(0, 6),
+        PaddingRight = UDim.new(0, 6),
+        PaddingTop = UDim.new(0, 6),
+        Parent = NotificationArea,
     })
     NotificationList = New("UIListLayout", {
         HorizontalAlignment = Enum.HorizontalAlignment.Right,
+        VerticalAlignment = Enum.VerticalAlignment.Top,
         Padding = UDim.new(0, 6),
         Parent = NotificationArea,
     })
@@ -5179,15 +5187,28 @@ end
 
 function Library:SetNotifySide(Side: string)
     Library.NotifySide = Side
+    local side = Side:lower()
 
-    if Side:lower() == "left" then
+    if side == "left" or side == "top-left" then
         NotificationArea.AnchorPoint = Vector2.new(0, 0)
-        NotificationArea.Position = UDim2.fromOffset(6, 6)
+        NotificationArea.Position = UDim2.new(0, 0, 0, 0)
         NotificationList.HorizontalAlignment = Enum.HorizontalAlignment.Left
-    else
+        NotificationList.VerticalAlignment = Enum.VerticalAlignment.Top
+    elseif side == "right" or side == "top-right" then
         NotificationArea.AnchorPoint = Vector2.new(1, 0)
-        NotificationArea.Position = UDim2.new(1, -6, 0, 6)
+        NotificationArea.Position = UDim2.new(1, 0, 0, 0)
         NotificationList.HorizontalAlignment = Enum.HorizontalAlignment.Right
+        NotificationList.VerticalAlignment = Enum.VerticalAlignment.Top
+    elseif side == "bottom-left" then
+        NotificationArea.AnchorPoint = Vector2.new(0, 1)
+        NotificationArea.Position = UDim2.new(0, 0, 1, 0)
+        NotificationList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+        NotificationList.VerticalAlignment = Enum.VerticalAlignment.Bottom
+    elseif side == "bottom-right" then
+        NotificationArea.AnchorPoint = Vector2.new(1, 1)
+        NotificationArea.Position = UDim2.new(1, 0, 1, 0)
+        NotificationList.HorizontalAlignment = Enum.HorizontalAlignment.Right
+        NotificationList.VerticalAlignment = Enum.VerticalAlignment.Bottom
     end
 end
 
@@ -5213,12 +5234,14 @@ function Library:Notify(...)
         Data.Description = tostring(Info.Description)
         Data.Time = Info.Time or 5
         Data.SoundId = Info.SoundId
+        Data.Volume = Info.Volume or 3
         Data.Steps = Info.Steps
         Data.Persist = Info.Persist
     else
         Data.Description = tostring(Info)
         Data.Time = select(2, ...) or 5
         Data.SoundId = select(3, ...)
+        Data.Volume = select(4, ...) or 3
     end
     Data.Destroyed = false
 
@@ -5247,7 +5270,12 @@ function Library:Notify(...)
 
     local Background = Library:MakeOutline(FakeBackground, Library.CornerRadius, 5)
     Background.AutomaticSize = Enum.AutomaticSize.Y
-    Background.Position = Library.NotifySide:lower() == "left" and UDim2.new(-1, -6, 0, -2) or UDim2.new(1, 6, 0, -2)
+    local side = Library.NotifySide:lower()
+    if side == "left" or side == "top-left" or side == "bottom-left" then
+        Background.Position = UDim2.new(-1, -6, 0, -2)
+    else
+        Background.Position = UDim2.new(1, 6, 0, -2)
+    end
     Background.Size = UDim2.fromScale(1, 0)
     Library:UpdateDPI(Background, {
         Position = false,
@@ -5412,7 +5440,7 @@ function Library:Notify(...)
 
         New("Sound", {
             SoundId = SoundId,
-            Volume = 3,
+            Volume = Data.Volume or 3,
             PlayOnRemove = true,
             Parent = SoundService,
         }):Destroy()
