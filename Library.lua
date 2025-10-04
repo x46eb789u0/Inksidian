@@ -1,4 +1,4 @@
-local ThreadFix = setthreadidentity and true or false -- djjs
+local ThreadFix = setthreadidentity and true or false -- fixed?
 if ThreadFix then
     local success = pcall(function() 
         setthreadidentity(8) 
@@ -23,6 +23,7 @@ local function randomString(length)
     end
     return result
 end
+local CoreGui: CoreGui = cloneref(game:GetService("CoreGui"))
 local Players: Players = cloneref(game:GetService("Players"))
 local RunService: RunService = cloneref(game:GetService("RunService"))
 local SoundService: SoundService = cloneref(game:GetService("SoundService"))
@@ -58,10 +59,7 @@ local protectgui = protectgui or (syn and syn.protect_gui) or (function()
 end)()
 
 local gethui = gethui or function()
-    return secureCall(function() 
-        local pg = LocalPlayer:WaitForChild("PlayerGui")
-        return cloneref and cloneref(pg) or pg
-    end) or PlayerGui
+    return CoreGui
 end
 
 local gc_protect = function(tbl)
@@ -1302,7 +1300,7 @@ end
 local function SafeParentUI(Instance: Instance, Parent: Instance | () -> Instance)
     local success, _error = pcall(function()
         if not Parent then
-            Parent = PlayerGui
+            Parent = CoreGui
         end
 
         local DestinationParent
@@ -1321,8 +1319,13 @@ local function SafeParentUI(Instance: Instance, Parent: Instance | () -> Instanc
 end
 
 local function ParentUI(UI: Instance, SkipHiddenUI: boolean?)
+    if SkipHiddenUI then
+        SafeParentUI(UI, CoreGui)
+        return
+    end
+
     pcall(protectgui, UI)
-    SafeParentUI(UI, PlayerGui)
+    SafeParentUI(UI, gethui)
 end
 
 local ScreenGui = New("ScreenGui", {
