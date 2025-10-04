@@ -1,4 +1,4 @@
-local ThreadFix = setthreadidentity and true or false -- fixed?
+local ThreadFix = setthreadidentity and true or false -- jdhdhd
 if ThreadFix then
     local success = pcall(function() 
         setthreadidentity(8) 
@@ -39,24 +39,7 @@ local getgenv = getgenv or function()
 end
 local setclipboard = setclipboard or nil
 
-local protectgui = protectgui or (syn and syn.protect_gui) or (function()
-    local protected = {}
-    return function(gui)
-        if gui then
-            protected[gui] = true
-
-            secureCall(function()
-                gui.Name = randomString(math.random(8, 16))
-            end)
-
-            pcall(function()
-                if cloneref then
-                    gui = cloneref(gui)
-                end
-            end)
-        end
-    end
-end)()
+local protectgui = protectgui or (syn and syn.protect_gui) or function() end
 
 local gethui = gethui or function()
     return CoreGui
@@ -1329,11 +1312,9 @@ local function ParentUI(UI: Instance, SkipHiddenUI: boolean?)
 end
 
 local ScreenGui = New("ScreenGui", {
-    Name = randomString(12),
-    DisplayOrder = math.random(800, 999),
+    Name = "Obsidian",
+    DisplayOrder = 999,
     ResetOnSpawn = false,
-    IgnoreGuiInset = true,
-    ZIndexBehavior = Enum.ZIndexBehavior.Global,
 })
 ParentUI(ScreenGui)
 Library.ScreenGui = ScreenGui
