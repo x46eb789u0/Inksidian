@@ -1,3 +1,4 @@
+--// Testing New Dropdowns \\--
 local ThreadFix = setthreadidentity and true or false
 if ThreadFix then
     local success = pcall(function() 
@@ -63,15 +64,6 @@ local gethui = gethui or function()
         return cloneref and cloneref(pg) or pg
     end) or PlayerGui
 end
-
---[[ if getrenv and setreadonly then
-    pcall(function()
-        local env = getrenv()
-        setreadonly(env, false)
-        env.script = nil
-        setreadonly(env, true)
-    end)
-end ]]--
 
 local gc_protect = function(tbl)
     pcall(function()
@@ -1828,6 +1820,36 @@ function Library:AddContextMenu(
         })
     end
 
+    -- Helper function to calculate smart position
+    local function CalculateMenuPosition()
+        local ViewportSize = workspace.CurrentCamera.ViewportSize
+        local OffsetValue = typeof(Offset) == "function" and Offset() or Offset
+        local XPos = math.floor(Holder.AbsolutePosition.X + OffsetValue[1])
+        local YPos = math.floor(Holder.AbsolutePosition.Y + OffsetValue[2])
+        
+        -- Get current menu size
+        local MenuSize = Menu.AbsoluteSize
+        local MenuHeight = MenuSize.Y
+        
+        -- If menu is not yet sized, calculate expected size
+        if MenuHeight == 0 then
+            local ExpectedSize = typeof(Table.Size) == "function" and Table.Size() or ApplyDPIScale(Table.Size)
+            MenuHeight = ExpectedSize.Y.Offset
+        end
+        
+        -- Check if dropdown would go off-screen at the bottom
+        if YPos + MenuHeight > ViewportSize.Y - 10 then
+            -- Position above the holder instead
+            YPos = math.floor(Holder.AbsolutePosition.Y - MenuHeight - 1.5)
+            -- Ensure it doesn't go off-screen at the top either
+            if YPos < 10 then
+                YPos = 10
+            end
+        end
+        
+        return XPos, YPos
+    end
+
     function Table:Open()
         if CurrentMenu == Table then
             return
@@ -1838,22 +1860,17 @@ function Library:AddContextMenu(
         CurrentMenu = Table
         Table.Active = true
 
-        if typeof(Offset) == "function" then
-            Menu.Position = UDim2.fromOffset(
-                math.floor(Holder.AbsolutePosition.X + Offset()[1]),
-                math.floor(Holder.AbsolutePosition.Y + Offset()[2])
-            )
-        else
-            Menu.Position = UDim2.fromOffset(
-                math.floor(Holder.AbsolutePosition.X + Offset[1]),
-                math.floor(Holder.AbsolutePosition.Y + Offset[2])
-            )
-        end
+        -- Set size first so we can calculate position correctly
         if typeof(Table.Size) == "function" then
             Menu.Size = Table.Size()
         else
             Menu.Size = ApplyDPIScale(Table.Size)
         end
+
+        -- Calculate smart position
+        local XPos, YPos = CalculateMenuPosition()
+        Menu.Position = UDim2.fromOffset(XPos, YPos)
+
         if typeof(ActiveCallback) == "function" then
             Library:SafeCallback(ActiveCallback, true)
         end
@@ -1861,17 +1878,8 @@ function Library:AddContextMenu(
         Menu.Visible = true
 
         Table.Signal = Holder:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
-            if typeof(Offset) == "function" then
-                Menu.Position = UDim2.fromOffset(
-                    math.floor(Holder.AbsolutePosition.X + Offset()[1]),
-                    math.floor(Holder.AbsolutePosition.Y + Offset()[2])
-                )
-            else
-                Menu.Position = UDim2.fromOffset(
-                    math.floor(Holder.AbsolutePosition.X + Offset[1]),
-                    math.floor(Holder.AbsolutePosition.Y + Offset[2])
-                )
-            end
+            local XPos, YPos = CalculateMenuPosition()
+            Menu.Position = UDim2.fromOffset(XPos, YPos)
         end)
     end
 
